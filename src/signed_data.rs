@@ -18,6 +18,7 @@ use ring::signature;
 /// X.509 certificates and related items that are signed are almost always
 /// encoded in the format "tbs||signatureAlgorithm||signature". This structure
 /// captures this pattern.
+#[derive(Debug)]
 pub struct SignedData<'a> {
     /// The signed data. This would be `tbsCertificate` in the case of an X.509
     /// certificate, `tbsResponseData` in the case of an OCSP response, and the
@@ -58,7 +59,7 @@ pub struct SignedData<'a> {
 ///     certs [0] EXPLICIT SEQUENCE OF Certificate OPTIONAL
 /// }
 /// ```
-/// 
+///
 /// Note that this function does NOT parse the outermost `SEQUENCE` or the
 /// `certs` value.
 ///

@@ -50,7 +50,11 @@ pub fn build_chain(
 
     // TODO: revocation.
 
+    println!("build_chain 1");
+
     match loop_while_non_fatal_error(trust_anchors, |trust_anchor: &TrustAnchor| {
+        println!("trust_anchor {:?}", trust_anchor);
+
         let trust_anchor_subject = untrusted::Input::from(trust_anchor.subject);
         if cert.issuer != trust_anchor_subject {
             println!("verify_cert 2, cert.issuer {:?}, trust_anchor_subject {:?}", cert.issuer, trust_anchor_subject);
@@ -79,9 +83,13 @@ pub fn build_chain(
         },
     }
 
+    println!("build_chain 2");
+
     loop_while_non_fatal_error(intermediate_certs, |cert_der| {
         let potential_issuer =
             cert::parse_cert(untrusted::Input::from(*cert_der), EndEntityOrCA::CA(&cert))?;
+
+        println!("potential_issuer {:?}", potential_issuer);
 
         if potential_issuer.subject != cert.issuer {
             println!("verify_cert 3, cert.issuer {:?}, potential_issuer.subject {:?}", cert.issuer, potential_issuer.subject);

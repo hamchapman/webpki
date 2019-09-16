@@ -14,11 +14,13 @@
 
 use crate::{der, signed_data, Error};
 
+#[derive(Debug)]
 pub enum EndEntityOrCA<'a> {
     EndEntity,
     CA(&'a Cert<'a>),
 }
 
+#[derive(Debug)]
 pub struct Cert<'a> {
     pub ee_or_ca: EndEntityOrCA<'a>,
 
