@@ -161,6 +161,7 @@ fn check_signatures(
     println!("check_signatures 3");
     loop {
         println!("check_signatures 4");
+        println!("supported_sig_algs {:?}", supported_sig_algs);
         signed_data::verify_signed_data(supported_sig_algs, spki_value, &cert.signed_data)?;
 
         println!("check_signatures 5");

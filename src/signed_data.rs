@@ -97,6 +97,7 @@ pub(crate) fn verify_signed_data(
     supported_algorithms: &[&SignatureAlgorithm], spki_value: untrusted::Input,
     signed_data: &SignedData,
 ) -> Result<(), Error> {
+    println!("supported_algorithms {:?}", supported_algorithms);
     // We need to verify the signature in `signed_data` using the public key
     // in `public_key`. In order to know which *ring* signature verification
     // algorithm to use, we need to know the public key algorithm (ECDSA,
@@ -119,10 +120,14 @@ pub(crate) fn verify_signed_data(
     println!("verify_signed_data 1");
     let mut found_signature_alg_match = false;
     println!("verify_signed_data 2");
-    for supported_alg in supported_algorithms.iter().filter(|alg| {
-        alg.signature_alg_id
-            .matches_algorithm_id_value(signed_data.algorithm)
-    }) {
+    let filtered_algs = supported_algorithms.iter().filter(|alg| {
+        let res = alg.signature_alg_id.matches_algorithm_id_value(signed_data.algorithm);
+        println!("alg {:?}", alg);
+        println!("signed_data.algorithm {:?}", signed_data.algorithm);
+        println!("res {:?}", res);
+        res
+    });
+    for supported_alg in filtered_algs {
         println!("verify_signed_data 3");
         match verify_signature(
             supported_alg,
@@ -199,6 +204,7 @@ fn parse_spki_value(input: untrusted::Input) -> Result<SubjectPublicKeyInfo, Err
 }
 
 /// A signature algorithm.
+#[derive(Debug)]
 pub struct SignatureAlgorithm {
     public_key_alg_id: AlgorithmIdentifier,
     signature_alg_id: AlgorithmIdentifier,
@@ -292,6 +298,7 @@ pub static ED25519: SignatureAlgorithm = SignatureAlgorithm {
     verification_alg: &signature::ED25519,
 };
 
+#[derive(Debug)]
 struct AlgorithmIdentifier {
     asn1_id_value: untrusted::Input<'static>,
 }
