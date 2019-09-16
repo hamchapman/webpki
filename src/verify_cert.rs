@@ -53,25 +53,41 @@ pub fn build_chain(
     println!("build_chain 1");
 
     match loop_while_non_fatal_error(trust_anchors, |trust_anchor: &TrustAnchor| {
+        println!("trust_anchor 1");
+
         println!("trust_anchor {:?}", trust_anchor);
 
         let trust_anchor_subject = untrusted::Input::from(trust_anchor.subject);
+
+        println!("trust_anchor 2");
+
         if cert.issuer != trust_anchor_subject {
+            println!("trust_anchor 3");
             println!("verify_cert 2, cert.issuer {:?}, trust_anchor_subject {:?}", cert.issuer, trust_anchor_subject);
             return Err(Error::UnknownIssuer);
         }
 
+        println!("trust_anchor 4");
+
         let name_constraints = trust_anchor.name_constraints.map(untrusted::Input::from);
+
+        println!("trust_anchor 5");
 
         untrusted::read_all_optional(name_constraints, Error::BadDER, |value| {
             name::check_name_constraints(value, &cert)
         })?;
 
+        println!("trust_anchor 6");
+
         let trust_anchor_spki = untrusted::Input::from(trust_anchor.spki);
+
+        println!("trust_anchor 7");
 
         // TODO: check_distrust(trust_anchor_subject, trust_anchor_spki)?;
 
         check_signatures(supported_sig_algs, cert, trust_anchor_spki)?;
+
+        println!("trust_anchor 8");
 
         Ok(())
     }) {
@@ -138,10 +154,16 @@ fn check_signatures(
     supported_sig_algs: &[&SignatureAlgorithm], cert_chain: &Cert,
     trust_anchor_key: untrusted::Input,
 ) -> Result<(), Error> {
+    println!("check_signatures 1");
     let mut spki_value = trust_anchor_key;
+    println!("check_signatures 2");
     let mut cert = cert_chain;
+    println!("check_signatures 3");
     loop {
+        println!("check_signatures 4");
         signed_data::verify_signed_data(supported_sig_algs, spki_value, &cert.signed_data)?;
+
+        println!("check_signatures 5");
 
         // TODO: check revocation
 
@@ -154,7 +176,11 @@ fn check_signatures(
                 break;
             },
         }
+
+        println!("check_signatures 6");
     }
+
+    println!("check_signatures 7");
 
     Ok(())
 }
