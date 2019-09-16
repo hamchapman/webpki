@@ -116,11 +116,14 @@ pub(crate) fn verify_signed_data(
 
     // Parse the signature.
     //
+    println!("verify_signed_data 1");
     let mut found_signature_alg_match = false;
+    println!("verify_signed_data 2");
     for supported_alg in supported_algorithms.iter().filter(|alg| {
         alg.signature_alg_id
             .matches_algorithm_id_value(signed_data.algorithm)
     }) {
+        println!("verify_signed_data 3");
         match verify_signature(
             supported_alg,
             spki_value,
@@ -128,18 +131,22 @@ pub(crate) fn verify_signed_data(
             signed_data.signature,
         ) {
             Err(Error::UnsupportedSignatureAlgorithmForPublicKey) => {
+                println!("verify_signed_data 4");
                 found_signature_alg_match = true;
                 continue;
             },
             result => {
+                println!("verify_signed_data 5");
                 return result;
             },
         }
     }
 
     if found_signature_alg_match {
+        println!("verify_signed_data 6");
         Err(Error::UnsupportedSignatureAlgorithmForPublicKey)
     } else {
+        println!("verify_signed_data 7");
         Err(Error::UnsupportedSignatureAlgorithm)
     }
 }
@@ -148,13 +155,17 @@ pub(crate) fn verify_signature(
     signature_alg: &SignatureAlgorithm, spki_value: untrusted::Input, msg: untrusted::Input,
     signature: untrusted::Input,
 ) -> Result<(), Error> {
+    println!("verify_signature 1");
     let spki = parse_spki_value(spki_value)?;
+    println!("verify_signature 2");
     if !signature_alg
         .public_key_alg_id
         .matches_algorithm_id_value(spki.algorithm_id_value)
     {
+        println!("verify_signature 3");
         return Err(Error::UnsupportedSignatureAlgorithmForPublicKey);
     }
+    println!("verify_signature 4");
     signature::UnparsedPublicKey::new(
         signature_alg.verification_alg,
         spki.key_value.as_slice_less_safe(),
@@ -173,9 +184,13 @@ struct SubjectPublicKeyInfo<'a> {
 // `PublicKeyAlgorithm` for the `SignatureAlgorithm` that is matched when
 // parsing the signature.
 fn parse_spki_value(input: untrusted::Input) -> Result<SubjectPublicKeyInfo, Error> {
+    println!("parse_spki_value 1");
     input.read_all(Error::BadDER, |input| {
+        println!("parse_spki_value 2");
         let algorithm_id_value = der::expect_tag_and_get_value(input, der::Tag::Sequence)?;
+        println!("parse_spki_value 3");
         let key_value = der::bit_string_with_no_unused_bits(input)?;
+        println!("parse_spki_value 4");
         Ok(SubjectPublicKeyInfo {
             algorithm_id_value,
             key_value,
