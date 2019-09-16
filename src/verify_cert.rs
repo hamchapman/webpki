@@ -39,6 +39,7 @@ pub fn build_chain(
             const MAX_SUB_CA_COUNT: usize = 6;
 
             if sub_ca_count >= MAX_SUB_CA_COUNT {
+                println!("verify_cert 1, sub_ca_count {:?}", sub_ca_count);
                 return Err(Error::UnknownIssuer);
             }
         },
@@ -52,6 +53,7 @@ pub fn build_chain(
     match loop_while_non_fatal_error(trust_anchors, |trust_anchor: &TrustAnchor| {
         let trust_anchor_subject = untrusted::Input::from(trust_anchor.subject);
         if cert.issuer != trust_anchor_subject {
+            println!("verify_cert 2, cert.issuer {:?}, trust_anchor_subject {:?}", cert.issuer, trust_anchor_subject);
             return Err(Error::UnknownIssuer);
         }
 
@@ -82,6 +84,7 @@ pub fn build_chain(
             cert::parse_cert(untrusted::Input::from(*cert_der), EndEntityOrCA::CA(&cert))?;
 
         if potential_issuer.subject != cert.issuer {
+            println!("verify_cert 3, cert.issuer {:?}, potential_issuer.subject {:?}", cert.issuer, potential_issuer.subject);
             return Err(Error::UnknownIssuer);
         }
 
@@ -89,6 +92,7 @@ pub fn build_chain(
         let mut prev = cert;
         loop {
             if potential_issuer.spki == prev.spki && potential_issuer.subject == prev.subject {
+                println!("verify_cert 4, potential_issuer.spki {:?} and prev.spki {:?}, potential_issuer.subject {:?} and prev.subject {:?}", potential_issuer.spki, prev.spki, potential_issuer.subject, prev.subject);
                 return Err(Error::UnknownIssuer);
             }
             match &prev.ee_or_ca {
@@ -329,5 +333,6 @@ where
             },
         }
     }
+    println!("verify_cert 5");
     Err(Error::UnknownIssuer)
 }
